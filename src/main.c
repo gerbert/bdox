@@ -1,6 +1,5 @@
 #include <ti/screen.h>
-#include <ti/getcsc.h>
-#include <stdlib.h>
+#include "menu.h"
 
 /* Main function, called first */
 int main(void)
@@ -8,11 +7,7 @@ int main(void)
     /* Clear the homescreen */
     os_ClrHome();
 
-    /* Print a string */
-    os_PutStrFull("Hello, World.");
-
-    /* Waits for a key */
-    while (!os_GetCSC());
+    while (print_menu() != k_Quit);
 
     /* Return 0 for success */
     return 0;
