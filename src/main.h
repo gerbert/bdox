@@ -8,25 +8,30 @@
 
 typedef struct {
     const char *name;
+    t_mode mode;
     void (*cb)(void *data);
 } mItem;
 
 static const mItem __menu_items[] = {
         {
                 .name = "1. Dec->Hex",
-                .cb = dec2hex
+                .mode = MODE_DEC_HEX,
+                .cb = convert
         },
         {
                 .name = "2. Dec->Bin",
-                .cb = dec2bin
+                .mode = MODE_DEC_BIN,
+                .cb = convert
         },
         {
                 .name = "3. Dec->Oct",
-                .cb = dec2oct
+                .mode = MODE_DEC_OCT,
+                .cb = convert
         },
         {
                 .name = "4. Hex->Dec",
-                .cb = hex2dec
+                .mode = MODE_HEX_DEC,
+                .cb = convert
         },
 };
 

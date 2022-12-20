@@ -42,6 +42,7 @@ int main(void)
 {
     uint16_t ret;
     uint8_t key;
+    t_mode mode;
 
     os_ClrHome();
     while ((ret = print_menu()) != k_Quit) {
@@ -50,7 +51,8 @@ int main(void)
             key = get_numeric(ret) - 48;
             switch (ret) {
                 case k_1 ... k_4:
-                    __menu_items[key - 1].cb(NULL);
+                    mode = __menu_items[key - 1].mode;
+                    __menu_items[key - 1].cb((void *)&mode);
                     break;
                 default:
                     break;

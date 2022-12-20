@@ -3,9 +3,14 @@
 
 #include <inttypes.h>
 
-void dec2hex(void __attribute__ ((unused)) *value);
-void hex2dec(void __attribute__ ((unused)) *value);
-void dec2bin(void __attribute__ ((unused)) *value);
-void dec2oct(void __attribute__ ((unused)) *value);
+// KEEP THE ORDER!
+typedef enum {
+    MODE_DEC_HEX = 0,
+    MODE_DEC_OCT,
+    MODE_DEC_BIN,
+    MODE_HEX_DEC
+} t_mode;
+
+void convert(void *value);
 
 #endif /* SRC_CALLBACKS_H */
