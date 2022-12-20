@@ -12,7 +12,6 @@ ARCHIVED		= NO
 CFLAGS			= -Wall -Wextra -Oz
 CXXFLAGS		= -Wall -Wextra -Oz
 EXTRA_C_SOURCES = \
-	src/menu.c \
 	src/callbacks.c
 
 # ----------------------------
