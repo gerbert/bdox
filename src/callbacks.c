@@ -40,8 +40,7 @@ void dec2hex(void __attribute__ ((unused)) *value) {
             num = get_numeric(key);
 
             if ((size_t)(ptr - buffer) < ARRAY_SZ(buffer)) {
-                printf("%d", num);
-                num += 48;
+                printf("%c", num);
                 memcpy((void *)(ptr++), (void *)&num, 1);
             } else {
                 continue;
@@ -56,7 +55,7 @@ void dec2hex(void __attribute__ ((unused)) *value) {
     if (ret <= UINT32_MAX)
         printf("0x%llX", ret);
     else
-        printf("Error: integer overflow");
+        printf("Error: Integer overflow");
 
     if (os_GetKey() == k_Quit)
         return;
