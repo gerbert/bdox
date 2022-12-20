@@ -17,9 +17,17 @@ static const mItem __menu_items[] = {
                 .cb = dec2hex
         },
         {
-                .name = "2. Hex->Dec",
+                .name = "2. Dec->Bin",
+                .cb = dec2bin
+        },
+        {
+                .name = "3. Dec->Oct",
+                .cb = dec2oct
+        },
+        {
+                .name = "4. Hex->Dec",
                 .cb = hex2dec
-        }
+        },
 };
 
 uint8_t get_numeric(uint16_t key);

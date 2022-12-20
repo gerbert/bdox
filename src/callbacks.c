@@ -6,8 +6,21 @@
 #include "callbacks.h"
 #include "main.h"
 
+#define DEC_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define DEC_TO_BINARY(x)  \
+    ((x & 0x80) ? '1' : '0'), \
+    ((x & 0x40) ? '1' : '0'), \
+    ((x & 0x20) ? '1' : '0'), \
+    ((x & 0x10) ? '1' : '0'), \
+    ((x & 0x08) ? '1' : '0'), \
+    ((x & 0x04) ? '1' : '0'), \
+    ((x & 0x02) ? '1' : '0'), \
+    ((x & 0x01) ? '1' : '0')
+
 typedef enum {
     MODE_DEC_HEX = 0,
+    MODE_DEC_OCT,
+    MODE_DEC_BIN,
     MODE_HEX_DEC,
     /* SENTINEL */
     MODE_MAX
@@ -45,7 +58,7 @@ static char *get_input(t_mode mode, size_t sz) {
         }
 
         switch (mode) {
-            case MODE_DEC_HEX:
+            case MODE_DEC_HEX ... MODE_DEC_BIN:
                 if ((key >= k_0) && (key <= k_9)) {
                     num = get_numeric(key);
 
@@ -85,7 +98,7 @@ void dec2hex(void __attribute__ ((unused)) *value) {
      * intentionally to protect ourselves from value overloading.
      */
     uint64_t ret;
-    char *ptr = get_input(MODE_DEC_HEX, 11);
+    char *ptr = get_input(MODE_DEC_HEX, 10);
     os_SetCursorPos(1, 0);
 
     if (ptr == NULL) {
@@ -138,4 +151,78 @@ void hex2dec(void __attribute__ ((unused)) *value) {
     free(ptr);
     // Return back
     hex2dec(value);
+}
+
+void dec2bin(void __attribute__ ((unused)) *value) {
+    /*
+     * Even though the value is 64 bit unsigned integer, we're
+     * going to operate only 32 bit unsigned integer. It's done
+     * intentionally to protect ourselves from value overloading.
+     */
+    uint64_t ret;
+    char *ptr = get_input(MODE_DEC_BIN, 10);
+    os_SetCursorPos(1, 0);
+
+    if (ptr == NULL) {
+        printf("Failed to convert a value");
+        return;
+    }
+
+    ret = (uint64_t)strtoll(ptr, NULL, 10);
+    if (ret <= UINT32_MAX) {
+        printf("31       23");
+        os_SetCursorPos(2, 0);
+        printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 24) & 0xFF));
+        printf(" ");
+        printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 16) & 0xFF));
+        printf(" ");
+        os_SetCursorPos(3, 0);
+        printf("15       7");
+        os_SetCursorPos(4, 0);
+        printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 8) & 0xFF));
+        printf(" ");
+        printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY(ret & 0xFF));
+    } else {
+        printf("Error: Integer overflow");
+    }
+
+    if (os_GetKey() == k_Quit) {
+        free(ptr);
+        return;
+    }
+
+    free(ptr);
+    // Return back
+    dec2bin(value);
+}
+
+void dec2oct(void __attribute__ ((unused)) *value) {
+    /*
+     * Even though the value is 64 bit unsigned integer, we're
+     * going to operate only 32 bit unsigned integer. It's done
+     * intentionally to protect ourselves from value overloading.
+     */
+    uint64_t ret;
+    char *ptr = get_input(MODE_DEC_OCT, 10);
+    os_SetCursorPos(1, 0);
+
+    if (ptr == NULL) {
+        printf("Failed to convert a value");
+        return;
+    }
+
+    ret = (uint64_t)strtoll(ptr, NULL, 8);
+    if (ret <= UINT32_MAX)
+        printf("%lld", ret);
+    else
+        printf("Error: Integer overflow");
+
+    if (os_GetKey() == k_Quit) {
+        free(ptr);
+        return;
+    }
+
+    free(ptr);
+    // Return back
+    dec2oct(value);
 }
