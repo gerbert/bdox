@@ -7,16 +7,19 @@ uint8_t get_numeric(uint16_t key) {
         case k_0 ... k_9:
             return (48 + (key - k_0));
             break;
+        case k_CapA ... k_CapF:
+            return (65 + (key - k_CapA));
+            break;
         default:
             break;
     }
 
-    return 255;
+    return 0;
 }
 
 static uint16_t print_menu(void) {
-    uint16_t key = 0;
-    uint8_t m_item = 0;
+    uint16_t key;
+    uint8_t m_item;
 
     os_ClrLCD();
     for (m_item = 0; m_item < ARRAY_SZ(__menu_items); m_item++) {
@@ -37,22 +40,23 @@ static uint16_t print_menu(void) {
 
 int main(void)
 {
-    uint16_t ret = 0;
-    uint8_t key = 0;
-    /* Clear the homescreen */
-    os_ClrHome();
+    uint16_t ret;
+    uint8_t key;
 
+    os_ClrHome();
     while ((ret = print_menu()) != k_Quit) {
-        key = get_numeric(ret) - 48;
-        switch (ret) {
-            case k_1:
-                __menu_items[key - 1].cb(NULL);
-                break;
-            default:
-                break;
+        // Allow numbers only
+        if ((ret >= k_0) && (ret <= k_9)) {
+            key = get_numeric(ret) - 48;
+            switch (ret) {
+                case k_1 ... k_2:
+                    __menu_items[key - 1].cb(NULL);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
-    /* Return 0 for success */
     return 0;
 }

@@ -15,9 +15,9 @@ typedef enum {
 
 static char *get_input(t_mode mode, size_t sz) {
     uint8_t num = 0;
-    uint16_t key = 0;
+    uint16_t key;
 
-    if (sz > 33)
+    if (sz > (UINT32_WIDTH + 1))
         return NULL;
 
     char *buffer = (char *) malloc(sizeof(char) * sz);
@@ -49,7 +49,20 @@ static char *get_input(t_mode mode, size_t sz) {
                 if ((key >= k_0) && (key <= k_9)) {
                     num = get_numeric(key);
 
-                    if ((size_t)(ptr - buffer) < 11) {
+                    if ((size_t)(ptr - buffer) < sz) {
+                        printf("%c", num);
+                        memcpy((void *)(ptr++), (void *)&num, 1);
+                    } else {
+                        continue;
+                    }
+                }
+                break;
+            case MODE_HEX_DEC:
+                if (((key >= k_0) && (key <= k_9)) ||
+                    ((key >= k_CapA) && (key <= k_CapF))) {
+                    num = get_numeric(key);
+
+                    if ((size_t)(ptr - buffer) < sz) {
                         printf("%c", num);
                         memcpy((void *)(ptr++), (void *)&num, 1);
                     } else {
@@ -71,7 +84,7 @@ void dec2hex(void __attribute__ ((unused)) *value) {
      * going to operate only 32 bit unsigned integer. It's done
      * intentionally to protect ourselves from value overloading.
      */
-    uint64_t ret = 0;
+    uint64_t ret;
     char *ptr = get_input(MODE_DEC_HEX, 11);
     os_SetCursorPos(1, 0);
 
@@ -97,5 +110,32 @@ void dec2hex(void __attribute__ ((unused)) *value) {
 }
 
 void hex2dec(void __attribute__ ((unused)) *value) {
-    return;
+    /*
+     * Even though the value is 64 bit unsigned integer, we're
+     * going to operate only 32 bit unsigned integer. It's done
+     * intentionally to protect ourselves from value overloading.
+     */
+    uint64_t ret;
+    char *ptr = get_input(MODE_HEX_DEC, 8);
+    os_SetCursorPos(1, 0);
+
+    if (ptr == NULL) {
+        printf("Failed to convert a value");
+        return;
+    }
+
+    ret = (uint64_t)strtoll(ptr, NULL, 16);
+    if (ret <= UINT32_MAX)
+        printf("%lld", ret);
+    else
+        printf("Error: Integer overflow");
+
+    if (os_GetKey() == k_Quit) {
+        free(ptr);
+        return;
+    }
+
+    free(ptr);
+    // Return back
+    hex2dec(value);
 }
