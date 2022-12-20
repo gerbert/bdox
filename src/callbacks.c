@@ -43,6 +43,8 @@ void dec2hex(void __attribute__ ((unused)) *value) {
                 printf("%d", num);
                 num += 48;
                 memcpy((void *)(ptr++), (void *)&num, 1);
+            } else {
+                continue;
             }
         }
     }
