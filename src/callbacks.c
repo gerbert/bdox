@@ -62,6 +62,7 @@ static char *get_input(t_mode mode, size_t sz) {
                 }
                 break;
             case MODE_HEX_DEC:
+            case MODE_HEX_BIN:
                 if (((key >= k_0) && (key <= k_9)) ||
                     ((key >= k_CapA) && (key <= k_CapF))) {
                     num = get_numeric(key);
@@ -97,7 +98,7 @@ void convert(void *value) {
         case MODE_DEC_HEX ... MODE_DEC_BIN:
             sz = 10;
             break;
-        case MODE_HEX_DEC:
+        case MODE_HEX_DEC ... MODE_HEX_BIN:
             sz = 8;
             break;
     }
@@ -118,6 +119,7 @@ void convert(void *value) {
             ret = (uint64_t)strtoll(ptr, NULL, 8);
             break;
         case MODE_HEX_DEC:
+        case MODE_HEX_BIN:
             ret = (uint64_t)strtoll(ptr, NULL, 16);
             break;
     }
@@ -128,6 +130,7 @@ void convert(void *value) {
                 printf("0x%llX", ret);
                 break;
             case MODE_DEC_BIN:
+            case MODE_HEX_BIN:
                 printf("31       23");
                 os_SetCursorPos(2, 0);
                 printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 24) & 0xFF));

@@ -33,6 +33,11 @@ static const mItem __menu_items[] = {
                 .mode = MODE_HEX_DEC,
                 .cb = convert
         },
+        {
+                .name = "5. Hex->Bin",
+                .mode = MODE_HEX_BIN,
+                .cb = convert
+        }
 };
 
 uint8_t get_numeric(uint16_t key);
