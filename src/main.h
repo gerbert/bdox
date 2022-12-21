@@ -37,6 +37,11 @@ static const mItem __menu_items[] = {
                 .name = "Hex->Bin",
                 .mode = MODE_HEX_BIN,
                 .cb = convert
+        },
+        {
+                .name = "Hex->Oct",
+                .mode = MODE_HEX_OCT,
+                .cb = convert
         }
 };
 

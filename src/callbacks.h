@@ -9,6 +9,7 @@ typedef enum {
     MODE_DEC_OCT,
     MODE_DEC_BIN,
     MODE_HEX_DEC,
+    MODE_HEX_OCT,
     MODE_HEX_BIN
 } t_mode;
 
