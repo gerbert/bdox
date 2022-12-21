@@ -3,13 +3,18 @@
 #include <stdio.h>
 #include "main.h"
 
+#define LEFT_COL_PATTERN        ("%1d %s")
+#define LEFT_COL_INDEX          (0)
+#define RIGHT_COL_PATTERN       ("%2d %s")
+#define RIGHT_COL_INDEX         (11)
+
 uint8_t get_numeric(uint16_t key) {
     switch (key) {
         case k_0 ... k_9:
-            return (48 + (key - k_0));
+            return (uint8_t)(48 + (key - k_0));
             break;
         case k_CapA ... k_CapF:
-            return (65 + (key - k_CapA));
+            return (uint8_t)(65 + (key - k_CapA));
             break;
         default:
             break;
@@ -39,13 +44,21 @@ void print_header(const char *text) {
 static uint16_t print_menu(void) {
     uint16_t key;
     uint8_t m_item;
+    char *ptr;
 
     os_ClrLCD();
     print_header("MENU");
 
     for (m_item = 0; m_item < ARRAY_SZ(__menu_items); m_item++) {
-        os_SetCursorPos(m_item, 0);
-        printf("(%1d): %s", (m_item + 1), __menu_items[m_item].name);
+        if (m_item > 5) {
+            os_SetCursorPos(m_item - 6, RIGHT_COL_INDEX);
+            ptr = RIGHT_COL_PATTERN;
+        } else {
+            os_SetCursorPos(m_item, LEFT_COL_INDEX);
+            ptr = LEFT_COL_PATTERN;
+        }
+
+        printf((const char *)ptr, (m_item + 1), __menu_items[m_item].name);
     }
 
     while ((key = os_GetKey()) != k_Enter) {

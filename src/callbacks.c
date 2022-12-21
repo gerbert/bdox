@@ -132,14 +132,10 @@ void convert(void *value) {
     }
 
     switch (mode) {
-        case MODE_DEC_HEX:
-        case MODE_DEC_BIN:
-        case MODE_DEC_OCT:
+        case MODE_DEC_HEX ... MODE_DEC_BIN:
             ret = (uint64_t)strtoll(ptr, NULL, 10);
             break;
-        case MODE_HEX_DEC:
-        case MODE_HEX_BIN:
-        case MODE_HEX_OCT:
+        case MODE_HEX_DEC ... MODE_HEX_BIN:
             ret = (uint64_t)strtoll(ptr, NULL, 16);
             break;
     }
