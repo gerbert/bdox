@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 #include "callbacks.h"
 #include "main.h"
 
@@ -20,6 +21,7 @@
 static char *get_input(t_mode mode, size_t sz) {
     uint8_t num = 0;
     uint16_t key;
+    bool k_valid = false;
 
     if (sz > UINT32_WIDTH)
         return NULL;
@@ -74,30 +76,27 @@ static char *get_input(t_mode mode, size_t sz) {
             case MODE_DEC_HEX ... MODE_DEC_BIN:
                 if ((key >= k_0) && (key <= k_9)) {
                     num = get_numeric(key);
-
-                    if ((size_t)(ptr - buffer) < sz) {
-                        printf("%c", num);
-                        memcpy((void *)(ptr++), (void *)&num, 1);
-                    } else {
-                        continue;
-                    }
+                    k_valid = true;
                 }
                 break;
             case MODE_HEX_DEC ... MODE_HEX_BIN:
                 if (((key >= k_0) && (key <= k_9)) ||
                     ((key >= k_CapA) && (key <= k_CapF))) {
                     num = get_numeric(key);
-
-                    if ((size_t)(ptr - buffer) < sz) {
-                        printf("%c", num);
-                        memcpy((void *)(ptr++), (void *)&num, 1);
-                    } else {
-                        continue;
-                    }
+                    k_valid = true;
                 }
                 break;
             default:
                 break;
+        }
+
+        if (k_valid) {
+            if ((size_t)(ptr - buffer) < sz) {
+                printf("%c", num);
+                memcpy((void *)(ptr++), (void *)&num, 1);
+            }
+
+            k_valid = false;
         }
     }
     os_DisableCursor();
