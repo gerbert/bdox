@@ -1,4 +1,5 @@
 #include <ti/screen.h>
+#include <ti/ui.h>
 #include <stdio.h>
 #include "main.h"
 
@@ -17,14 +18,27 @@ uint8_t get_numeric(uint16_t key) {
     return 0;
 }
 
+void print_header(const char *text) {
+    // Redraw the status bar to reset the text
+    os_DrawStatusBar();
+    // Set text box back/foreground color
+    os_SetDrawBGColor(0x52AA);
+    os_SetDrawFGColor(0xFFFF);
+    // The font should be tiny to fit into the status bar without overlapping
+    os_FontSelect(os_SmallFont);
+    os_FontDrawText(text, 1, 15);
+}
+
 static uint16_t print_menu(void) {
     uint16_t key;
     uint8_t m_item;
 
     os_ClrLCD();
+    print_header("MENU");
+
     for (m_item = 0; m_item < ARRAY_SZ(__menu_items); m_item++) {
         os_SetCursorPos(m_item, 0);
-        os_PutStrLine(__menu_items[m_item].name);
+        printf("(%1d): %s", (m_item + 1), __menu_items[m_item].name);
     }
 
     while ((key = os_GetKey()) != k_Enter) {

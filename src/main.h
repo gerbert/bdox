@@ -14,32 +14,33 @@ typedef struct {
 
 static const mItem __menu_items[] = {
         {
-                .name = "1. Dec->Hex",
+                .name = "Dec->Hex",
                 .mode = MODE_DEC_HEX,
                 .cb = convert
         },
         {
-                .name = "2. Dec->Bin",
+                .name = "Dec->Bin",
                 .mode = MODE_DEC_BIN,
                 .cb = convert
         },
         {
-                .name = "3. Dec->Oct",
+                .name = "Dec->Oct",
                 .mode = MODE_DEC_OCT,
                 .cb = convert
         },
         {
-                .name = "4. Hex->Dec",
+                .name = "Hex->Dec",
                 .mode = MODE_HEX_DEC,
                 .cb = convert
         },
         {
-                .name = "5. Hex->Bin",
+                .name = "Hex->Bin",
                 .mode = MODE_HEX_BIN,
                 .cb = convert
         }
 };
 
 uint8_t get_numeric(uint16_t key);
+void print_header(const char *text);
 
 #endif /* SRC_MAIN_H */

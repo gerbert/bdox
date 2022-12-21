@@ -32,6 +32,25 @@ static char *get_input(t_mode mode, size_t sz) {
     char *ptr = &buffer[0];
 
     os_ClrLCD();
+
+    switch (mode) {
+        case MODE_DEC_HEX:
+            print_header("10 > 16");
+            break;
+        case MODE_DEC_BIN:
+            print_header("10 > 2");
+            break;
+        case MODE_DEC_OCT:
+            print_header("10 > 8");
+            break;
+        case MODE_HEX_DEC:
+            print_header("16 > 10");
+            break;
+        case MODE_HEX_BIN:
+            print_header("16 > 2");
+            break;
+    }
+
     os_SetCursorPos(0, 0);
 
     os_EnableCursor();
