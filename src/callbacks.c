@@ -132,10 +132,8 @@ void convert(void *value) {
     switch (mode) {
         case MODE_DEC_HEX:
         case MODE_DEC_BIN:
-            ret = (uint64_t)strtoll(ptr, NULL, 10);
-            break;
         case MODE_DEC_OCT:
-            ret = (uint64_t)strtoll(ptr, NULL, 8);
+            ret = (uint64_t)strtoll(ptr, NULL, 10);
             break;
         case MODE_HEX_DEC:
         case MODE_HEX_BIN:
@@ -165,6 +163,8 @@ void convert(void *value) {
 
                 break;
             case MODE_DEC_OCT:
+                printf("%llo", ret);
+                break;
             case MODE_HEX_DEC:
                 printf("%lld", ret);
                 break;
