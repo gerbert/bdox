@@ -21,7 +21,7 @@ static char *get_input(t_mode mode, size_t sz) {
     uint8_t num = 0;
     uint16_t key;
 
-    if (sz > (UINT32_WIDTH + 1))
+    if (sz > UINT32_WIDTH)
         return NULL;
 
     char *buffer = (char *) malloc(sizeof(char) * sz);
