@@ -42,5 +42,6 @@ static const mItem __menu_items[] = {
 
 uint8_t get_numeric(uint16_t key);
 void print_header(const char *text);
+void print_t(const char *text, uint16_t col, uint8_t row);
 
 #endif /* SRC_MAIN_H */

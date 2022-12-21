@@ -6,15 +6,15 @@
 #include "callbacks.h"
 #include "main.h"
 
-#define DEC_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define DEC_TO_BINARY(x)  \
-    ((x & 0x80) ? '1' : '0'), \
-    ((x & 0x40) ? '1' : '0'), \
-    ((x & 0x20) ? '1' : '0'), \
-    ((x & 0x10) ? '1' : '0'), \
-    ((x & 0x08) ? '1' : '0'), \
-    ((x & 0x04) ? '1' : '0'), \
-    ((x & 0x02) ? '1' : '0'), \
+#define DEC_TO_BINARY_PATTERN   "%c%c%c%c%c%c%c%c"
+#define DEC_TO_BINARY(x)        \
+    ((x & 0x80) ? '1' : '0'),   \
+    ((x & 0x40) ? '1' : '0'),   \
+    ((x & 0x20) ? '1' : '0'),   \
+    ((x & 0x10) ? '1' : '0'),   \
+    ((x & 0x08) ? '1' : '0'),   \
+    ((x & 0x04) ? '1' : '0'),   \
+    ((x & 0x02) ? '1' : '0'),   \
     ((x & 0x01) ? '1' : '0')
 
 static char *get_input(t_mode mode, size_t sz) {
@@ -150,14 +150,14 @@ void convert(void *value) {
                 break;
             case MODE_DEC_BIN:
             case MODE_HEX_BIN:
-                printf("31       23");
+                print_t("31                                              23", 1, 63);
                 os_SetCursorPos(2, 0);
                 printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 24) & 0xFF));
                 printf(" ");
                 printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 16) & 0xFF));
                 printf(" ");
                 os_SetCursorPos(3, 0);
-                printf("15       7");
+                print_t("15                                              7", 1, 103);
                 os_SetCursorPos(4, 0);
                 printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 8) & 0xFF));
                 printf(" ");

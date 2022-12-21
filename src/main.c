@@ -18,6 +18,13 @@ uint8_t get_numeric(uint16_t key) {
     return 0;
 }
 
+void print_t(const char *text, uint16_t col, uint8_t row) {
+    os_SetDrawBGColor(0xFFFF);
+    os_SetDrawFGColor(0x0000);
+    os_FontSelect(os_SmallFont);
+    os_FontDrawText(text, col, row);
+}
+
 void print_header(const char *text) {
     // Redraw the status bar to reset the text
     os_DrawStatusBar();
