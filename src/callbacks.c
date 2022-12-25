@@ -27,8 +27,10 @@ static char *get_input(t_mode mode, size_t sz) {
         return NULL;
 
     char *buffer = (char *) malloc(sizeof(char) * sz);
-    if (buffer == NULL)
+    if (buffer == NULL) {
+        printf("Memory allocation error");
         return NULL;
+    }
 
     memset(buffer, 0, sizeof(char) * sz);
     char *ptr = &buffer[0];
@@ -62,6 +64,7 @@ static char *get_input(t_mode mode, size_t sz) {
     while ((key = os_GetKey()) != k_Enter) {
         if (key == k_Quit) {
             os_DisableCursor();
+            free(buffer);
             return NULL;
         } else if (key == k_Clear) {
             os_ClrLCD();
@@ -125,10 +128,8 @@ void convert(void *value) {
 
     ptr = get_input(mode, sz);
     os_SetCursorPos(1, 0);
-    if (ptr == NULL) {
-        printf("Failed to convert a value");
+    if (ptr == NULL)
         return;
-    }
 
     switch (mode) {
         case MODE_DEC_HEX ... MODE_DEC_BIN:
