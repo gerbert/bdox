@@ -56,6 +56,9 @@ static char *get_input(t_mode mode, size_t sz) {
         case MODE_HEX_OCT:
             print_header("16 > 8");
             break;
+        case MODE_OCT_DEC:
+            print_header("8 > 10");
+            break;
     }
 
     os_SetCursorPos(0, 0);
@@ -85,6 +88,12 @@ static char *get_input(t_mode mode, size_t sz) {
             case MODE_HEX_DEC ... MODE_HEX_BIN:
                 if (((key >= k_0) && (key <= k_9)) ||
                     ((key >= k_CapA) && (key <= k_CapF))) {
+                    num = get_numeric(key);
+                    k_valid = true;
+                }
+                break;
+            case MODE_OCT_DEC:
+                if ((key >= k_0) && (key <= k_7)) {
                     num = get_numeric(key);
                     k_valid = true;
                 }
@@ -124,6 +133,9 @@ void convert(void *value) {
         case MODE_HEX_DEC ... MODE_HEX_BIN:
             sz = 8;
             break;
+        case MODE_OCT_DEC:
+            sz = 10;
+            break;
     }
 
     ptr = get_input(mode, sz);
@@ -137,6 +149,9 @@ void convert(void *value) {
             break;
         case MODE_HEX_DEC ... MODE_HEX_BIN:
             ret = (uint64_t)strtoll(ptr, NULL, 16);
+            break;
+        case MODE_OCT_DEC:
+            ret = (uint64_t)strtoll(ptr, NULL, 8);
             break;
     }
 
@@ -166,6 +181,7 @@ void convert(void *value) {
                 printf("%llo", ret);
                 break;
             case MODE_HEX_DEC:
+            case MODE_OCT_DEC:
                 printf("%lld", ret);
                 break;
         }

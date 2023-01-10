@@ -84,7 +84,7 @@ int main(void)
         if ((ret >= k_0) && (ret <= k_9)) {
             key = get_numeric(ret) - 48;
             switch (ret) {
-                case k_1 ... k_6:
+                case k_1 ... k_7:
                     mode = __menu_items[key - 1].mode;
                     __menu_items[key - 1].cb((void *)&mode);
                     break;
