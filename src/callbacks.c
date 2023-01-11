@@ -59,6 +59,12 @@ static char *get_input(t_mode mode, size_t sz) {
         case MODE_OCT_DEC:
             print_header("8 > 10");
             break;
+        case MODE_OCT_HEX:
+            print_header("8 > 16");
+            break;
+        case MODE_OCT_BIN:
+            print_header("8 > 2");
+            break;
     }
 
     os_SetCursorPos(0, 0);
@@ -92,7 +98,7 @@ static char *get_input(t_mode mode, size_t sz) {
                     k_valid = true;
                 }
                 break;
-            case MODE_OCT_DEC:
+            case MODE_OCT_DEC ... MODE_OCT_BIN:
                 if ((key >= k_0) && (key <= k_7)) {
                     num = get_numeric(key);
                     k_valid = true;
@@ -133,7 +139,7 @@ void convert(void *value) {
         case MODE_HEX_DEC ... MODE_HEX_BIN:
             sz = 8;
             break;
-        case MODE_OCT_DEC:
+        case MODE_OCT_DEC ... MODE_OCT_BIN:
             sz = 10;
             break;
     }
@@ -150,7 +156,7 @@ void convert(void *value) {
         case MODE_HEX_DEC ... MODE_HEX_BIN:
             ret = (uint64_t)strtoll(ptr, NULL, 16);
             break;
-        case MODE_OCT_DEC:
+        case MODE_OCT_DEC ... MODE_OCT_BIN:
             ret = (uint64_t)strtoll(ptr, NULL, 8);
             break;
     }
@@ -158,10 +164,12 @@ void convert(void *value) {
     if (ret <= UINT32_MAX) {
         switch (mode) {
             case MODE_DEC_HEX:
+            case MODE_OCT_HEX:
                 printf("0x%llX", ret);
                 break;
             case MODE_DEC_BIN:
             case MODE_HEX_BIN:
+            case MODE_OCT_BIN:
                 print_t("31                                              23", 1, 63);
                 os_SetCursorPos(2, 0);
                 printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 24) & 0xFF));

@@ -47,6 +47,16 @@ static const mItem menu_items[] = {
                 .name = "Oct->Dec",
                 .mode = MODE_OCT_DEC,
                 .cb = convert
+        },
+        {
+                .name = "Oct->Hex",
+                .mode = MODE_OCT_HEX,
+                .cb = convert
+        },
+        {
+                .name = "Oct->Bin",
+                .mode = MODE_OCT_BIN,
+                .cb = convert
         }
 };
 
