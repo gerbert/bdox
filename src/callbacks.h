@@ -10,7 +10,10 @@ typedef enum {
     MODE_DEC_BIN,
     MODE_HEX_DEC,
     MODE_HEX_OCT,
-    MODE_HEX_BIN
+    MODE_HEX_BIN,
+    MODE_OCT_DEC,
+    MODE_OCT_HEX,
+    MODE_OCT_BIN
 } t_mode;
 
 void convert(void *value);
