@@ -1,6 +1,7 @@
 #include <ti/screen.h>
 #include <ti/ui.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "main.h"
 
 #define LEFT_COL_PATTERN        ("%1d %s")
@@ -41,15 +42,16 @@ void print_header(const char *text) {
     os_FontDrawText(text, 1, 15);
 }
 
-static uint16_t print_menu(void) {
+static uint8_t print_menu(void) {
     uint16_t key;
     uint8_t m_item;
     char *ptr;
+    char menu_number[2] = {0};
 
     os_ClrLCD();
     print_header("MENU");
 
-    for (m_item = 0; m_item < ARRAY_SZ(__menu_items); m_item++) {
+    for (m_item = 0; m_item < ARRAY_SZ(menu_items); m_item++) {
         if (m_item > 5) {
             os_SetCursorPos(m_item - 6, RIGHT_COL_INDEX);
             ptr = RIGHT_COL_PATTERN;
@@ -58,39 +60,54 @@ static uint16_t print_menu(void) {
             ptr = LEFT_COL_PATTERN;
         }
 
-        printf((const char *)ptr, (m_item + 1), __menu_items[m_item].name);
+        printf((const char *)ptr, (m_item + 1), menu_items[m_item].name);
     }
 
+    ptr = &menu_number[0];
+    os_SetCursorPos(252, 0);
+    os_EnableCursor();
+    printf("Choice (0/quit): ");
     while ((key = os_GetKey()) != k_Enter) {
-        if (key == k_Quit)
-            break;
+        if (key == k_Quit) {
+            os_DisableCursor();
+            printf("quit");
+            return 0;
+        }
 
-        if ((key >= k_0) && (key <= k_9))
-            return key;
+        if (key == k_Clear)
+            return print_menu();
+
+        if ((key >= k_0) && (key <= k_9)) {
+            if ((size_t)(ptr - menu_number) < ARRAY_SZ(menu_number)) {
+                m_item = get_numeric(key);
+                *ptr = (char)m_item;
+                ptr++;
+                printf("%c", m_item);
+            } else {
+                break;
+            }
+        }
     }
 
-    return k_Quit;
+    os_DisableCursor();
+    return (uint8_t)strtoul(menu_number, NULL, 10);
 }
 
 int main(void)
 {
-    uint16_t ret;
-    uint8_t key;
+    uint8_t m_item;
     t_mode mode;
 
     os_ClrHome();
-    while ((ret = print_menu()) != k_Quit) {
-        // Allow numbers only
-        if ((ret >= k_0) && (ret <= k_9)) {
-            key = get_numeric(ret) - 48;
-            switch (ret) {
-                case k_1 ... k_7:
-                    mode = __menu_items[key - 1].mode;
-                    __menu_items[key - 1].cb((void *)&mode);
-                    break;
-                default:
-                    break;
-            }
+    while ((m_item = print_menu()) != 0) {
+        if (m_item <= ARRAY_SZ(menu_items)) {
+            mode = menu_items[m_item - 1].mode;
+            menu_items[m_item - 1].cb((void *) &mode);
+        } else {
+            os_ClrLCD();
+            os_SetCursorPos(252, 0);
+            printf("Wrong menu item!");
+            os_GetKey();
         }
     }
 

@@ -4,7 +4,7 @@
 #include <ti/getkey.h>
 #include "callbacks.h"
 
-#define ARRAY_SZ(x)         (sizeof(x) / sizeof(x[0]))
+#define ARRAY_SZ(x)         (uint8_t)(sizeof(x) / sizeof(x[0]))
 
 typedef struct {
     const char *name;
@@ -12,7 +12,7 @@ typedef struct {
     void (*cb)(void *data);
 } mItem;
 
-static const mItem __menu_items[] = {
+static const mItem menu_items[] = {
         {
                 .name = "Dec->Hex",
                 .mode = MODE_DEC_HEX,
