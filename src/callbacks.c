@@ -161,6 +161,8 @@ void convert(void *value) {
             break;
     }
 
+    free(ptr);
+
     if (ret <= UINT32_MAX) {
         switch (mode) {
             case MODE_DEC_HEX:
@@ -197,12 +199,9 @@ void convert(void *value) {
         printf("Error: Integer overflow");
     }
 
-    if (os_GetKey() == k_Quit) {
-        free(ptr);
+    if (os_GetKey() == k_Quit)
         return;
-    }
 
-    free(ptr);
     // Return back
     convert(value);
 }
