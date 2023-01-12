@@ -33,6 +33,9 @@ static uint8_t get_length(t_mode mode) {
         case MODE_HEX_DEC ... MODE_HEX_BIN:
             return 8;
             break;
+        case MODE_BIN_DEC ... MODE_BIN_OCT:
+            return 32;
+            break;
         default:
             return 0;
             break;
@@ -72,6 +75,15 @@ static void p_header(t_mode mode) {
             break;
         case MODE_OCT_BIN:
             print_header("8 > 2");
+            break;
+        case MODE_BIN_DEC:
+            print_header("2 > 10");
+            break;
+        case MODE_BIN_HEX:
+            print_header("2 > 16");
+            break;
+        case MODE_BIN_OCT:
+            print_header("2 > 8");
             break;
     }
 }
@@ -171,7 +183,7 @@ static char *get_input(t_mode mode) {
 
 /**
  * Perform the conversion and print the result
- * @param value
+ * @param mode system mode
  */
 void convert(t_mode mode) {
     /*
@@ -182,8 +194,9 @@ void convert(t_mode mode) {
     uint64_t ret;
     char *ptr;
 
-    ptr = get_input(mode);
     os_SetCursorPos(1, 0);
+
+    ptr = get_input(mode);
     if (ptr == NULL)
         return;
 
@@ -197,6 +210,9 @@ void convert(t_mode mode) {
         case MODE_OCT_DEC ... MODE_OCT_BIN:
             ret = (uint64_t)strtoll(ptr, NULL, 8);
             break;
+        default:
+            free(ptr);
+            return;
     }
 
     free(ptr);
@@ -232,6 +248,8 @@ void convert(t_mode mode) {
             case MODE_OCT_DEC:
                 printf("%lld", ret);
                 break;
+            default:
+                break;
         }
     } else {
         printf("Error: Integer overflow");
@@ -242,4 +260,13 @@ void convert(t_mode mode) {
 
     // Return back
     convert(mode);
+}
+
+/**
+ * Convert from Binary to DEC/HEX/OCT and print the result
+ *
+ * @param mode system mode
+ */
+void convert_bin(t_mode __attribute__ ((unused)) mode) {
+    __asm__("nop");
 }

@@ -5,9 +5,9 @@
 #include "main.h"
 
 #define LEFT_COL_PATTERN        ("%1d %s")
-#define LEFT_COL_INDEX          (0)
+#define LEFT_COL_INDEX          (1)
 #define RIGHT_COL_PATTERN       ("%2d %s")
-#define RIGHT_COL_INDEX         (11)
+#define RIGHT_COL_INDEX         (14)
 
 uint8_t get_numeric(uint16_t key) {
     switch (key) {
