@@ -9,7 +9,7 @@
 typedef struct {
     const char *name;
     t_mode mode;
-    void (*cb)(void *data);
+    void (*cb)(t_mode mode);
 } mItem;
 
 static const mItem menu_items[] = {

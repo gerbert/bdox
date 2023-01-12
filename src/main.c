@@ -96,13 +96,11 @@ static uint8_t print_menu(void) {
 int main(void)
 {
     uint8_t m_item;
-    t_mode mode;
 
     os_ClrHome();
     while ((m_item = print_menu()) != 0) {
         if (m_item <= ARRAY_SZ(menu_items)) {
-            mode = menu_items[m_item - 1].mode;
-            menu_items[m_item - 1].cb((void *) &mode);
+            menu_items[m_item - 1].cb(menu_items[m_item - 1].mode);
         } else {
             os_ClrLCD();
             os_SetCursorPos(252, 0);

@@ -18,25 +18,33 @@
     ((x & 0x02) ? '1' : '0'),   \
     ((x & 0x01) ? '1' : '0')
 
-static char *get_input(t_mode mode, size_t sz) {
-    uint8_t num = 0;
-    uint16_t key;
-    bool k_valid = false;
-
-    if (sz > UINT32_WIDTH)
-        return NULL;
-
-    char *buffer = (char *) malloc(sizeof(char) * sz);
-    if (buffer == NULL) {
-        printf("Memory allocation error");
-        return NULL;
+/**
+ * Get the number of characters for a particular mode.
+ *
+ * @param mode system mode
+ * @return maximum number of input characters
+ */
+static uint8_t get_length(t_mode mode) {
+    switch (mode) {
+        case MODE_DEC_HEX ... MODE_DEC_BIN:
+        case MODE_OCT_DEC ... MODE_OCT_BIN:
+            return 10;
+            break;
+        case MODE_HEX_DEC ... MODE_HEX_BIN:
+            return 8;
+            break;
+        default:
+            return 0;
+            break;
     }
+}
 
-    memset(buffer, 0, sizeof(char) * sz);
-    char *ptr = &buffer[0];
-
-    os_ClrLCD();
-
+/**
+ * Print header based on selected numerical system mode
+ *
+ * @param mode system mode
+ */
+static void p_header(t_mode mode) {
     switch (mode) {
         case MODE_DEC_HEX:
             print_header("10 > 16");
@@ -66,7 +74,47 @@ static char *get_input(t_mode mode, size_t sz) {
             print_header("8 > 2");
             break;
     }
+}
 
+/**
+ * Allocate a memory region for a particular conversion mode
+ *
+ * @param length a number of characters
+ * @return a pointer to allocated memory region or NULL
+ */
+static char *p_alloc(uint8_t length) {
+    if (length > UINT32_WIDTH)
+        return NULL;
+
+    char *p = (char *)malloc(sizeof(char) * length);
+    if (p == NULL) {
+        printf("Memory allocation error");
+        return NULL;
+    }
+
+    memset(p, 0, sizeof(char) * length);
+    return p;
+}
+
+/**
+ * Get user input and parse it in accordance to the selected conversion mode
+ *
+ * @param mode system mode
+ * @return input buffer
+ */
+static char *get_input(t_mode mode) {
+    uint8_t num = 0;
+    uint16_t key;
+    uint8_t length = get_length(mode);
+    bool k_valid = false;
+
+    char *buffer = p_alloc(length);
+    if (buffer == NULL)
+        return NULL;
+    char *ptr = &buffer[0];
+
+    os_ClrLCD();
+    p_header(mode);
     os_SetCursorPos(0, 0);
 
     os_EnableCursor();
@@ -77,7 +125,7 @@ static char *get_input(t_mode mode, size_t sz) {
             return NULL;
         } else if (key == k_Clear) {
             os_ClrLCD();
-            memset(buffer, 0, sizeof(char) * sz);
+            memset(buffer, 0, sizeof(char) * length);
             os_SetCursorPos(0, 0);
 
             ptr = &buffer[0];
@@ -109,7 +157,7 @@ static char *get_input(t_mode mode, size_t sz) {
         }
 
         if (k_valid) {
-            if ((size_t)(ptr - buffer) < sz) {
+            if ((size_t)(ptr - buffer) < length) {
                 printf("%c", num);
                 memcpy((void *)(ptr++), (void *)&num, 1);
             }
@@ -121,30 +169,20 @@ static char *get_input(t_mode mode, size_t sz) {
     return buffer;
 }
 
-void convert(void *value) {
+/**
+ * Perform the conversion and print the result
+ * @param value
+ */
+void convert(t_mode mode) {
     /*
      * Even though the value is 64 bit unsigned integer, we're
      * going to operate only 32 bit unsigned integer. It's done
      * intentionally to protect ourselves from value overloading.
      */
     uint64_t ret;
-    t_mode mode = *(t_mode *)value;
-    size_t sz = 0;
     char *ptr;
 
-    switch (mode) {
-        case MODE_DEC_HEX ... MODE_DEC_BIN:
-            sz = 10;
-            break;
-        case MODE_HEX_DEC ... MODE_HEX_BIN:
-            sz = 8;
-            break;
-        case MODE_OCT_DEC ... MODE_OCT_BIN:
-            sz = 10;
-            break;
-    }
-
-    ptr = get_input(mode, sz);
+    ptr = get_input(mode);
     os_SetCursorPos(1, 0);
     if (ptr == NULL)
         return;
@@ -203,5 +241,5 @@ void convert(void *value) {
         return;
 
     // Return back
-    convert(value);
+    convert(mode);
 }

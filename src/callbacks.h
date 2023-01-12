@@ -16,6 +16,6 @@ typedef enum {
     MODE_OCT_BIN
 } t_mode;
 
-void convert(void *value);
+void convert(t_mode mode);
 
 #endif /* SRC_CALLBACKS_H */
