@@ -224,11 +224,15 @@ static void print_bb(char *buffer) {
  * @param key key code
  * @param row pointer to row variable
  * @param col pointer to column variable
+ * @return buffer index
  */
-static void bitem_xy(uint16_t key, uint8_t *row, uint8_t *col) {
+static uint8_t bitem_xy(uint16_t key, uint8_t *row, uint8_t *col) {
     unsigned int cur_row = 0;
     unsigned int cur_col = 0;
+    uint8_t _row = 0;
+    uint8_t _col = 0;
     uint8_t step = 0;
+    uint8_t index = 0;
 
     /*
      * We need not only to put the cursor into the right place, but also not to
@@ -245,8 +249,8 @@ static void bitem_xy(uint16_t key, uint8_t *row, uint8_t *col) {
             else
                 cur_row = 3;
 
-            *row = (uint8_t)cur_row;
-            *col = (uint8_t)cur_col;
+            _row = (uint8_t)cur_row;
+            _col = (uint8_t)cur_col;
             break;
         case k_Left:
             if (cur_col > 0) {
@@ -264,9 +268,11 @@ static void bitem_xy(uint16_t key, uint8_t *row, uint8_t *col) {
             else
                 step = 0;
 
-            *row = (uint8_t)cur_row;
-            *col = (uint8_t)(cur_col - step);
+            _row = (uint8_t)cur_row;
+            _col = (uint8_t)(cur_col - step);
             break;
+        case k_0:
+        case k_1:
         case k_Right:
             cur_col++;
 
@@ -284,12 +290,25 @@ static void bitem_xy(uint16_t key, uint8_t *row, uint8_t *col) {
             else
                 step = 0;
 
-            *row = (uint8_t)cur_row;
-            *col = (uint8_t)(cur_col + step);
+            _row = (uint8_t)cur_row;
+            _col = (uint8_t)(cur_col + step);
             break;
         default:
+            _row = 1;
+            _col = 0;
             break;
     }
+
+    if (_row == 1) {
+        index = (uint8_t)((_col > 8) ? (_col - 1) : _col);
+    } else {
+        index += 1;
+        index += (uint8_t)((_col > 8) ? (_col - 1) : _col) + 15;
+    }
+
+    *row = _row;
+    *col = _col;
+    return index;
 }
 
 /**
@@ -298,30 +317,28 @@ static void bitem_xy(uint16_t key, uint8_t *row, uint8_t *col) {
  * @param buffer binary number buffer
  * @return buffer index
  */
-static uint8_t bitem_at(char *buffer, uint16_t key) {
+static void bitem_at(char *buffer, uint16_t key) {
     char *ptr = &buffer[0];
     uint8_t col = 0;
     uint8_t row = 0;
     uint8_t index = 0;
+    uint8_t num = 0;
 
-    bitem_xy(key, &row, &col);
+    if (key != k_0 || key != k_1)
+        index = bitem_xy(key, &row, &col);
 
-    // Calculate buffer index based on cursor position
-    index = (uint8_t)(col);
-    index += (row == 3) ? 15 : 0;
+    if (key == k_0 || key == k_1) {
+        num = get_numeric(key);
+        sprintf(&ptr[index], "%c", num);
+    }
 
     printf("%c", ptr[index]);
     os_SetCursorPos(row, col);
-
-    return index;
 }
 
-static char *get_input_bin(t_mode mode) {
-//    uint8_t num = 0;
-    uint8_t index = 0;
-    uint16_t key;
+static char *binput_get(t_mode mode) {
     uint8_t length = get_length(mode);
-//    bool k_valid = false;
+    uint16_t key;
 
     char *buffer = p_alloc(length);
     if (buffer == NULL)
@@ -349,13 +366,7 @@ static char *get_input_bin(t_mode mode) {
 
         switch(mode) {
             case MODE_BIN_DEC ... MODE_BIN_OCT:
-                index = bitem_at(ptr, key);
-//                printf("%c", ptr[index]);
-
-//                if ((key >= k_0) && (key <= k_1)) {
-//                    num = get_numeric(key);
-//                    k_valid = true;
-//                }
+                bitem_at(ptr, key);
                 break;
             default:
                 break;
@@ -363,7 +374,7 @@ static char *get_input_bin(t_mode mode) {
     }
 
     os_DisableCursor();
-    return NULL;
+    return buffer;
 }
 
 /**
@@ -454,9 +465,9 @@ void convert_bin(t_mode __attribute__ ((unused)) mode) {
 //    uint64_t ret;
     char *ptr;
 
-    os_SetCursorPos(1, 0);
+//    os_SetCursorPos(1, 0);
 
-    ptr = get_input_bin(mode);
+    ptr = binput_get(mode);
     if (ptr == NULL)
         return;
 
