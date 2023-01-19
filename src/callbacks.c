@@ -225,10 +225,10 @@ static void print_bb(char *buffer) {
  * @return buffer index
  */
 static uint8_t bitem_at(uint16_t key) {
-    static uint8_t index = 0;
     unsigned int cur_row = 0;
     unsigned int cur_col = 0;
     uint8_t step = 0;
+    uint8_t index = 0;
 
     /*
      * We need not only to put the cursor into the right place, but also not to
