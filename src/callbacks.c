@@ -219,16 +219,16 @@ static void print_bb(char *buffer) {
 }
 
 /**
- * Get an index of a binary number according to the cursor coordinates
+ * Get coordinates based on key press
  *
- * @param buffer binary number buffer
- * @return buffer index
+ * @param key key code
+ * @param row pointer to row variable
+ * @param col pointer to column variable
  */
-static uint8_t bitem_at(uint16_t key) {
+static void bitem_xy(uint16_t key, uint8_t *row, uint8_t *col) {
     unsigned int cur_row = 0;
     unsigned int cur_col = 0;
     uint8_t step = 0;
-    uint8_t index = 0;
 
     /*
      * We need not only to put the cursor into the right place, but also not to
@@ -239,18 +239,14 @@ static uint8_t bitem_at(uint16_t key) {
     switch (key) {
         case k_Up:
         case k_Down:
-            if (cur_col < 8)
-                index = (uint8_t)cur_col;
-            else
-                index = (uint8_t)(cur_col - 1);
-
             // We allow only row 1 and 3
             if (cur_row == 3)
                 cur_row = 1;
             else
                 cur_row = 3;
 
-            os_SetCursorPos((uint8_t)cur_row, (uint8_t)cur_col);
+            *row = (uint8_t)cur_row;
+            *col = (uint8_t)cur_col;
             break;
         case k_Left:
             if (cur_col > 0) {
@@ -268,7 +264,8 @@ static uint8_t bitem_at(uint16_t key) {
             else
                 step = 0;
 
-            os_SetCursorPos((uint8_t)cur_row, (uint8_t)(cur_col - step));
+            *row = (uint8_t)cur_row;
+            *col = (uint8_t)(cur_col - step);
             break;
         case k_Right:
             cur_col++;
@@ -287,15 +284,34 @@ static uint8_t bitem_at(uint16_t key) {
             else
                 step = 0;
 
-            os_SetCursorPos((uint8_t)cur_row, (uint8_t)(cur_col + step));
+            *row = (uint8_t)cur_row;
+            *col = (uint8_t)(cur_col + step);
             break;
         default:
             break;
     }
+}
+
+/**
+ * Get an index of a binary number according to the cursor coordinates
+ *
+ * @param buffer binary number buffer
+ * @return buffer index
+ */
+static uint8_t bitem_at(char *buffer, uint16_t key) {
+    char *ptr = &buffer[0];
+    uint8_t col = 0;
+    uint8_t row = 0;
+    uint8_t index = 0;
+
+    bitem_xy(key, &row, &col);
 
     // Calculate buffer index based on cursor position
-    index = (uint8_t)(cur_col - step);
-    index += (cur_row == 3) ? 15 : 0;
+    index = (uint8_t)(col);
+    index += (row == 3) ? 15 : 0;
+
+    printf("%c", ptr[index]);
+    os_SetCursorPos(row, col);
 
     return index;
 }
@@ -333,7 +349,7 @@ static char *get_input_bin(t_mode mode) {
 
         switch(mode) {
             case MODE_BIN_DEC ... MODE_BIN_OCT:
-                index = bitem_at(key);
+                index = bitem_at(ptr, key);
 //                printf("%c", ptr[index]);
 
 //                if ((key >= k_0) && (key <= k_1)) {
