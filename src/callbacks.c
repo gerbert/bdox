@@ -7,7 +7,13 @@
 #include "callbacks.h"
 #include "main.h"
 
-#define DEC_TO_BINARY_PATTERN   "%c%c%c%c%c%c%c%c"
+#define BINARY_PATTERN          "%c%c%c%c%c%c%c%c"
+#define BINARY_HEADER(col1, row1, col2, row2)                                   \
+({                                                                              \
+    print_t("31                                              23", col1, row1);  \
+    print_t("15                                              7", col2, row2);   \
+})
+
 #define DEC_TO_BINARY(x)        \
     ((x & 0x80) ? '1' : '0'),   \
     ((x & 0x40) ? '1' : '0'),   \
@@ -182,6 +188,169 @@ static char *get_input(t_mode mode) {
 }
 
 /**
+ * Print the screen for binary->... conversion
+ *
+ * @param buffer binary number buffer
+ */
+static void print_bb(char *buffer) {
+    char *ptr = &buffer[0];
+    uint8_t step = 0;
+    uint8_t row = 0;
+    uint8_t col = 0;
+
+    BINARY_HEADER(0, 43, 0, 83);
+
+    os_SetCursorPos(1, 0);
+    for (row = 1; row <=3; row += 2) {
+        for (col = 0; col < 16; col++) {
+            if (col > 7)
+                step = 1;
+            else
+                step = 0;
+
+            os_SetCursorPos(row, col + step);
+            if (row == 3)
+                printf("%c", ptr[16 + col]);
+            else
+                printf("%c", ptr[col]);
+        }
+    }
+    os_SetCursorPos(1, 0);
+}
+
+/**
+ * Get an index of a binary number according to the cursor coordinates
+ *
+ * @param buffer binary number buffer
+ * @return buffer index
+ */
+static uint8_t bitem_at(uint16_t key) {
+    static uint8_t index = 0;
+    unsigned int cur_row = 0;
+    unsigned int cur_col = 0;
+    uint8_t step = 0;
+
+    /*
+     * We need not only to put the cursor into the right place, but also not to
+     * forget to redraw the number under the cursor (especially when user moves
+     * the cursor left/right/up/down within the range.
+     */
+    os_GetCursorPos(&cur_row, &cur_col);
+    switch (key) {
+        case k_Up:
+        case k_Down:
+            if (cur_col < 8)
+                index = (uint8_t)cur_col;
+            else
+                index = (uint8_t)(cur_col - 1);
+
+            // We allow only row 1 and 3
+            if (cur_row == 3)
+                cur_row = 1;
+            else
+                cur_row = 3;
+
+            os_SetCursorPos((uint8_t)cur_row, (uint8_t)cur_col);
+            break;
+        case k_Left:
+            if (cur_col > 0) {
+                cur_col--;
+            } else {
+                if (cur_row == 3)
+                    cur_row = 1;
+                else
+                    cur_row = 3;
+                cur_col = 16;
+            }
+
+            if (cur_col == 8)
+                step = 1;
+            else
+                step = 0;
+
+            os_SetCursorPos((uint8_t)cur_row, (uint8_t)(cur_col - step));
+            break;
+        case k_Right:
+            cur_col++;
+
+            if (cur_col > 16) {
+                if (cur_row == 1)
+                    cur_row = 3;
+                else
+                    cur_row = 1;
+
+                cur_col = 0;
+            }
+
+            if (cur_col == 8)
+                step = 1;
+            else
+                step = 0;
+
+            os_SetCursorPos((uint8_t)cur_row, (uint8_t)(cur_col + step));
+            break;
+        default:
+            break;
+    }
+
+    // Calculate buffer index based on cursor position
+    index = (uint8_t)(cur_col - step);
+    index += (cur_row == 3) ? 15 : 0;
+
+    return index;
+}
+
+static char *get_input_bin(t_mode mode) {
+//    uint8_t num = 0;
+    uint8_t index = 0;
+    uint16_t key;
+    uint8_t length = get_length(mode);
+//    bool k_valid = false;
+
+    char *buffer = p_alloc(length);
+    if (buffer == NULL)
+        return NULL;
+    memset(buffer, '0', length);
+    char *ptr = &buffer[0];
+
+    os_ClrLCD();
+    p_header(mode);
+    print_bb(ptr);
+
+    os_EnableCursor();
+    while ((key = os_GetKey()) != k_Enter) {
+        if (key == k_Quit) {
+            os_DisableCursor();
+            free(buffer);
+            return NULL;
+        } else if (key == k_Clear) {
+            os_ClrLCD();
+            memset(buffer, '0', sizeof(char) * length);
+            ptr = &buffer[0];
+            print_bb(ptr);
+            continue;
+        }
+
+        switch(mode) {
+            case MODE_BIN_DEC ... MODE_BIN_OCT:
+                index = bitem_at(key);
+//                printf("%c", ptr[index]);
+
+//                if ((key >= k_0) && (key <= k_1)) {
+//                    num = get_numeric(key);
+//                    k_valid = true;
+//                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    os_DisableCursor();
+    return NULL;
+}
+
+/**
  * Perform the conversion and print the result
  * @param mode system mode
  */
@@ -226,18 +395,16 @@ void convert(t_mode mode) {
             case MODE_DEC_BIN:
             case MODE_HEX_BIN:
             case MODE_OCT_BIN:
-                print_t("31                                              23", 1, 63);
+                BINARY_HEADER(1, 63, 1, 103);
                 os_SetCursorPos(2, 0);
-                printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 24) & 0xFF));
+                printf(BINARY_PATTERN, DEC_TO_BINARY((ret >> 24) & 0xFF));
                 printf(" ");
-                printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 16) & 0xFF));
+                printf(BINARY_PATTERN, DEC_TO_BINARY((ret >> 16) & 0xFF));
                 printf(" ");
-                os_SetCursorPos(3, 0);
-                print_t("15                                              7", 1, 103);
                 os_SetCursorPos(4, 0);
-                printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY((ret >> 8) & 0xFF));
+                printf(BINARY_PATTERN, DEC_TO_BINARY((ret >> 8) & 0xFF));
                 printf(" ");
-                printf(DEC_TO_BINARY_PATTERN, DEC_TO_BINARY(ret & 0xFF));
+                printf(BINARY_PATTERN, DEC_TO_BINARY(ret & 0xFF));
 
                 break;
             case MODE_DEC_OCT:
@@ -268,5 +435,14 @@ void convert(t_mode mode) {
  * @param mode system mode
  */
 void convert_bin(t_mode __attribute__ ((unused)) mode) {
-    __asm__("nop");
+//    uint64_t ret;
+    char *ptr;
+
+    os_SetCursorPos(1, 0);
+
+    ptr = get_input_bin(mode);
+    if (ptr == NULL)
+        return;
+
+    free(ptr);
 }
