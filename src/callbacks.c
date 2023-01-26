@@ -24,6 +24,13 @@
     ((x & 0x02) ? '1' : '0'),   \
     ((x & 0x01) ? '1' : '0')
 
+/**
+ * Get buffer index based on cursor position
+ *
+ * @param col column
+ * @param row row
+ * @return index
+ */
 static uint8_t get_index(uint8_t col, uint8_t row) {
     uint8_t index = 0;
 
@@ -232,113 +239,88 @@ static void print_bb(char *buffer) {
 }
 
 /**
- * Get coordinates based on key press
+ * Set the cursor position based on a key pressed
  *
- * @param key key code
- * @return buffer index
+ * @param key key pressed
  */
-static uint8_t bitem_xy(char *buffer, uint16_t key) {
-    unsigned int cur_row = 0;
-    unsigned int cur_col = 0;
-    uint8_t row = 0;
-    uint8_t col = 0;
-    uint8_t step = 0;
+static void binput_cursor(uint16_t key, char *buffer) {
+    char *ptr = &buffer[0];
+    static unsigned int col = 0;
+    static unsigned int row = 1;
+    unsigned int _col = 0;
+    unsigned int _row = 0;
     uint8_t index = 0;
+    bool update = false;
 
     /*
-     * We need not only to put the cursor into the right place, but also not to
-     * forget to redraw the number under the cursor (especially when user moves
-     * the cursor left/right/up/down within the range.
+     * If it's k_0/1 - we move the cursor right, while on conventional nav key
+     * (left/right/up/down) we just navigate.
      */
-    os_GetCursorPos(&cur_row, &cur_col);
-    // Calculate current index
-    index = get_index((uint8_t)cur_col, (uint8_t)cur_row);
-
+    os_GetCursorPos(&_row, &_col);
     switch (key) {
+        case k_0:
+            break;
+        case k_1:
+            break;
         case k_Up:
         case k_Down:
-            // We allow only row 1 and 3
-            if (cur_row == 3)
-                cur_row = 1;
+            if (_row == 1)
+                _row = 3;
             else
-                cur_row = 3;
+                _row = 1;
 
-            row = (uint8_t)cur_row;
-            col = (uint8_t)cur_col;
+            update = true;
             break;
         case k_Left:
-            if (cur_col > 0) {
-                cur_col--;
-            } else {
-                if (cur_row == 3)
-                    cur_row = 1;
+            if (_col == 9)
+                _col--;
+
+            if (_col-- == 0) {
+                _col = 16;
+
+                if (_row == 1)
+                    _row = 3;
                 else
-                    cur_row = 3;
-                cur_col = 16;
+                    _row = 1;
             }
 
-            if (cur_col == 8)
-                step = 1;
-            else
-                step = 0;
-
-            row = (uint8_t)cur_row;
-            col = (uint8_t)(cur_col - step);
+            update = true;
             break;
         case k_Right:
-            cur_col++;
+            if (_col == 7)
+                _col++;
 
-            if (cur_col > 16) {
-                if (cur_row == 1)
-                    cur_row = 3;
+            if (_col++ == 16) {
+                _col = 0;
+
+                if (_row == 1)
+                    _row = 3;
                 else
-                    cur_row = 1;
-
-                cur_col = 0;
+                    _row = 1;
             }
 
-            if (cur_col == 8)
-                step = 1;
-            else
-                step = 0;
-
-            row = (uint8_t)cur_row;
-            col = (uint8_t)(cur_col + step);
+            update = true;
+            break;
+        default:
             break;
     }
 
-    // Redraw item
-    printf("%c", buffer[index]);
-    os_SetCursorPos(row, col);
-    return index;
-}
+    if (update) {
+        // Redraw value under cursor before moving the cursor further
+        index = get_index((uint8_t)col, (uint8_t)row);
+        printf("%c", ptr[index]);
+        // Update position
+        row = _row;
+        col = _col;
+    }
 
-/**
- * Print binary number on a particular position on the screen
- *
- * @param buffer binary number buffer
- * @param key key pressed on a keypad
- */
-static void bitem_at(char *buffer, uint16_t key) {
-//    char *ptr = &buffer[0];
-    uint8_t index = 0;
-//    uint8_t num = 0;
-
-    // Navigation: Up/Down/Left/Right
-    if (key == k_Up || key == k_Down || key == k_Left || key == k_Right)
-        index = bitem_xy(buffer, key);
-
-//    if (key == k_0 || key == k_1) {
-//        num = get_numeric(key);
-//        sprintf(&ptr[index], "%c", num);
-//    }
-//
-//    printf("%c", ptr[index]);
+    os_SetCursorPos((uint8_t)row, (uint8_t)col);
 }
 
 static char *binput_get(t_mode mode) {
     uint8_t length = get_length(mode);
-    uint16_t key;
+    uint16_t key = 0;
+    uint8_t num = 0;
 
     char *buffer = p_alloc(length);
     if (buffer == NULL)
@@ -366,7 +348,7 @@ static char *binput_get(t_mode mode) {
 
         switch(mode) {
             case MODE_BIN_DEC ... MODE_BIN_OCT:
-                bitem_at(ptr, key);
+                binput_cursor(key, buffer);
                 break;
             default:
                 break;
