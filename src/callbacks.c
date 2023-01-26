@@ -250,6 +250,7 @@ static void binput_cursor(uint16_t key, char *buffer) {
     unsigned int _col = 0;
     unsigned int _row = 0;
     uint8_t index = 0;
+    uint8_t num = 0;
     bool update = false;
 
     /*
@@ -259,8 +260,16 @@ static void binput_cursor(uint16_t key, char *buffer) {
     os_GetCursorPos(&_row, &_col);
     switch (key) {
         case k_0:
-            break;
         case k_1:
+            /*
+             * Here we get the key pressed, update the value under the cursor
+             * and move the cursor right to its current position.
+             */
+            num = get_numeric(key);
+            index = get_index((uint8_t)col, (uint8_t)row);
+            sprintf(&ptr[index], "%c", num);
+            binput_cursor(k_Right, buffer);
+            return;
             break;
         case k_Up:
         case k_Down:
@@ -320,17 +329,15 @@ static void binput_cursor(uint16_t key, char *buffer) {
 static char *binput_get(t_mode mode) {
     uint8_t length = get_length(mode);
     uint16_t key = 0;
-    uint8_t num = 0;
 
     char *buffer = p_alloc(length);
     if (buffer == NULL)
         return NULL;
     memset(buffer, '0', length);
-    char *ptr = &buffer[0];
 
     os_ClrLCD();
     p_header(mode);
-    print_bb(ptr);
+    print_bb(buffer);
 
     os_EnableCursor();
     while ((key = os_GetKey()) != k_Enter) {
@@ -341,8 +348,7 @@ static char *binput_get(t_mode mode) {
         } else if (key == k_Clear) {
             os_ClrLCD();
             memset(buffer, '0', sizeof(char) * length);
-            ptr = &buffer[0];
-            print_bb(ptr);
+            print_bb(buffer);
             continue;
         }
 
@@ -443,15 +449,40 @@ void convert(t_mode mode) {
  *
  * @param mode system mode
  */
-void convert_bin(t_mode __attribute__ ((unused)) mode) {
-//    uint64_t ret;
+void convert_bin(t_mode mode) {
+    uint32_t ret = 0;
+    uint8_t i = 0;
+    uint8_t value = 0;
     char *ptr;
-
-//    os_SetCursorPos(1, 0);
 
     ptr = binput_get(mode);
     if (ptr == NULL)
         return;
 
+    for (i = 0; i < 32; i++) {
+        value = ((ptr[i] == '0') ? 0 : 1) & 0x01;
+        ret |= (uint32_t)(value << (31 - i));
+    }
     free(ptr);
+
+    os_SetCursorPos(5, 0);
+    switch (mode) {
+        case MODE_BIN_DEC:
+            printf("%ld", ret);
+            break;
+        case MODE_BIN_HEX:
+            printf("0x%lX", ret);
+            break;
+        case MODE_BIN_OCT:
+            printf("0o%lo", ret);
+            break;
+        default:
+            break;
+    }
+
+    if (os_GetKey() == k_Quit)
+        return;
+
+    // Return back
+    convert_bin(mode);
 }
