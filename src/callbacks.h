@@ -13,9 +13,13 @@ typedef enum {
     MODE_HEX_BIN,
     MODE_OCT_DEC,
     MODE_OCT_HEX,
-    MODE_OCT_BIN
+    MODE_OCT_BIN,
+    MODE_BIN_DEC,
+    MODE_BIN_HEX,
+    MODE_BIN_OCT
 } t_mode;
 
-void convert(void *value);
+void convert(t_mode mode);
+void convert_bin(t_mode mode);
 
 #endif /* SRC_CALLBACKS_H */

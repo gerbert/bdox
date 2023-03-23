@@ -13,10 +13,8 @@ uint8_t get_numeric(uint16_t key) {
     switch (key) {
         case k_0 ... k_9:
             return (uint8_t)(48 + (key - k_0));
-            break;
         case k_CapA ... k_CapF:
             return (uint8_t)(65 + (key - k_CapA));
-            break;
         default:
             break;
     }
@@ -102,7 +100,7 @@ int main(void)
     while ((m_item = print_menu()) != 0) {
         if (m_item <= ARRAY_SZ(menu_items)) {
             mode = menu_items[m_item - 1].mode;
-            menu_items[m_item - 1].cb((void *) &mode);
+            menu_items[m_item - 1].cb(mode);
         } else {
             os_ClrLCD();
             os_SetCursorPos(252, 0);
