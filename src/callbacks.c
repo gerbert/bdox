@@ -45,6 +45,55 @@ static uint8_t get_length(t_mode mode) {
 }
 
 /**
+ * Get buffer index based on cursor position
+ *
+ * @param col column
+ * @param row row
+ * @return index
+ */
+static uint8_t get_index(uint8_t col, uint8_t row) {
+    uint8_t index;
+
+    if (row == 1) {
+        index = (col > 8) ? (col - 1) : col;
+    } else {
+        index += 1;
+        index += ((col > 8) ? (col - 1) : col) + 15;
+    }
+
+    return (32 - index);
+}
+
+/**
+ * Print the screen for binary->... conversion
+ *
+ * @param number variable with the number to display as binary
+ */
+static void p_bbuffer(uint32_t number) {
+    uint8_t step;
+    uint8_t row;
+    uint8_t col;
+    uint8_t index;
+
+    BINARY_HEADER(0, 43, 0, 83);
+
+    os_SetCursorPos(1, 0);
+    for (row = 1; row <=3; row += 2) {
+        for (col = 0; col < 16; col++) {
+            if (col > 7)
+                step = 1;
+            else
+                step = 0;
+
+            os_SetCursorPos(row, col + step);
+            index = get_index(col + step, row);
+            printf("%lu", (number >> index) & 0x01);
+        }
+    }
+    os_SetCursorPos(1, 0);
+}
+
+/**
  * Print header based on selected numerical system mode
  *
  * @param mode system mode
