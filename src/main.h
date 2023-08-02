@@ -6,7 +6,7 @@
 
 #define ARRAY_SZ(x)         (uint8_t)(sizeof(x) / sizeof(x[0]))
 
-typedef struct {
+typedef struct __attribute__ ((packed)) {
     const char *name;
     t_mode mode;
     void (*cb)(t_mode mode);

@@ -24,6 +24,49 @@
     ((x & 0x02) ? '1' : '0'),   \
     ((x & 0x01) ? '1' : '0')
 
+typedef struct __attribute__ ((packed)) {
+    const char *name;
+} mode_map;
+
+static const mode_map mode_caption[] = {
+        [MODE_DEC_HEX] = {
+                .name = "10 > 16"
+        },
+        [MODE_DEC_OCT] = {
+                .name = "10 > 8"
+        },
+        [MODE_DEC_BIN] = {
+                .name = "10 > 2"
+        },
+        [MODE_HEX_DEC] = {
+                .name = "16 > 10"
+        },
+        [MODE_HEX_OCT] = {
+                .name = "16 > 8"
+        },
+        [MODE_HEX_BIN] = {
+                .name = "16 > 2"
+        },
+        [MODE_OCT_DEC] = {
+                .name = "8 > 10"
+        },
+        [MODE_OCT_HEX] = {
+                .name = "8 > 16"
+        },
+        [MODE_OCT_BIN] = {
+                .name = "8 > 2"
+        },
+        [MODE_BIN_DEC] = {
+                .name = "2 > 10"
+        },
+        [MODE_BIN_HEX] = {
+                .name = "2 > 16"
+        },
+        [MODE_BIN_OCT] = {
+                .name = "2 > 8"
+        }
+};
+
 /**
  * Get the number of characters for a particular mode.
  *
@@ -51,8 +94,9 @@ static uint8_t get_length(t_mode mode) {
  * @param row row
  * @return index
  */
+#if 0
 static uint8_t get_index(uint8_t col, uint8_t row) {
-    uint8_t index;
+    uint8_t index = 0;
 
     if (row == 1) {
         index = (col > 8) ? (col - 1) : col;
@@ -92,6 +136,7 @@ static void p_bbuffer(uint32_t number) {
     }
     os_SetCursorPos(1, 0);
 }
+#endif /* 0 */
 
 /**
  * Print header based on selected numerical system mode
@@ -99,44 +144,7 @@ static void p_bbuffer(uint32_t number) {
  * @param mode system mode
  */
 static void p_header(t_mode mode) {
-    switch (mode) {
-        case MODE_DEC_HEX:
-            print_header("10 > 16");
-            break;
-        case MODE_DEC_BIN:
-            print_header("10 > 2");
-            break;
-        case MODE_DEC_OCT:
-            print_header("10 > 8");
-            break;
-        case MODE_HEX_DEC:
-            print_header("16 > 10");
-            break;
-        case MODE_HEX_BIN:
-            print_header("16 > 2");
-            break;
-        case MODE_HEX_OCT:
-            print_header("16 > 8");
-            break;
-        case MODE_OCT_DEC:
-            print_header("8 > 10");
-            break;
-        case MODE_OCT_HEX:
-            print_header("8 > 16");
-            break;
-        case MODE_OCT_BIN:
-            print_header("8 > 2");
-            break;
-        case MODE_BIN_DEC:
-            print_header("2 > 10");
-            break;
-        case MODE_BIN_HEX:
-            print_header("2 > 16");
-            break;
-        case MODE_BIN_OCT:
-            print_header("2 > 8");
-            break;
-    }
+    print_header(mode_caption[mode].name);
 }
 
 /**
@@ -269,7 +277,7 @@ void convert(t_mode mode) {
         switch (mode) {
             case MODE_DEC_HEX:
             case MODE_OCT_HEX:
-                printf("0x%llX", ret);
+                printf("\n0x%llX", ret);
                 break;
             case MODE_DEC_BIN:
             case MODE_HEX_BIN:
@@ -288,11 +296,11 @@ void convert(t_mode mode) {
                 break;
             case MODE_DEC_OCT:
             case MODE_HEX_OCT:
-                printf("%llo", ret);
+                printf("\n%llo", ret);
                 break;
             case MODE_HEX_DEC:
             case MODE_OCT_DEC:
-                printf("%lld", ret);
+                printf("\n%lld", ret);
                 break;
             default:
                 break;
@@ -336,5 +344,4 @@ void convert_bin(t_mode __attribute__ ((unused)) mode) {
 //
 //    // Return back
 //    convert_bin(mode);
-    return;
 }
